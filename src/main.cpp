@@ -24,6 +24,8 @@ glm::vec3 lightPos = glm::vec3(5.0f, 5.0f, 5.0f);
 glm::vec3 viewPos = glm::vec3(0.0f, 0.0f, 5.0f);
 
 GLuint blinnShader;
+GLuint blinnShaderRed;
+GLuint blinnShaderBlue;
 GLuint phongShader;
 GLuint texblinnShader;
 //GLuint normalblinnShader;
@@ -137,7 +139,7 @@ void window_size_callback(GLFWwindow* window, int w, int h)
 
     glViewport(0, 0, width, height);
 
-    matProj = glm::perspective(glm::radians(60.0f), width/(float)height, 2.0f, 8.0f);
+    matProj = glm::perspective(glm::radians(60.0f), width/(float)height, 0.5f, 100.0f);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -288,6 +290,14 @@ int main()
     setLightPosition(lightPos);
     setViewPosition(viewPos);
 
+    blinnShaderRed = initShader( "shaders/blinnRed.vert", "shaders/blinnRed.frag");
+    setLightPosition(lightPos);
+    setViewPosition(viewPos);
+
+    blinnShaderBlue = initShader( "shaders/blinnBlue.vert", "shaders/blinnBlue.frag");
+    setLightPosition(lightPos);
+    setViewPosition(viewPos);
+
     texblinnShader = initShader("shaders/texblinn.vert", "shaders/texblinn.frag");
     setLightPosition(lightPos);
     setViewPosition(viewPos);
@@ -313,7 +323,7 @@ int main()
     matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); 
 
     // set the Y field of view angle to 60 degrees, width/height ratio to 1.0, and a near plane of 3.5, far plane of 6.5
-    matProj = glm::perspective(glm::radians(60.0f), width / (float) height, 2.0f, 8.0f);
+    matProj = glm::perspective(glm::radians(60.0f), width / (float) height, 0.5f, 100.0f);
 
     // LabA09 Shadow Map
     matLightView = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); 
@@ -329,41 +339,45 @@ int main()
 
     //----------------------------------------------------
     // Meshes
-    std::shared_ptr<Mesh> cube = std::make_shared<Mesh>();
-    cube->init("models/cube.obj", blinnShader);
+    
+    std::shared_ptr<Mesh> pinkOrb2 = std::make_shared<Mesh>();
+    pinkOrb2->init("models/pinkOrb.obj", blinnShader);
 
-    std::shared_ptr<Mesh> teapot = std::make_shared<Mesh>();
-    teapot->init("models/teapot.obj", blinnShader);
+    std::shared_ptr<Mesh> cone = std::make_shared<Mesh>();
+    cone->init("models/cone.obj", blinnShaderRed);
 
-    std::shared_ptr<Mesh> bunny = std::make_shared<Mesh>();
-    bunny->init("models/bunny_normal.obj", texblinnShader);
-
-    //std::shared_ptr<Mesh> box = std::make_shared<Mesh>();
-    // box->init("models/Box_normal.obj", normalblinnShader);
-
+    // std::shared_ptr<Mesh> mysphere = std::make_shared<Mesh>();
+    // mysphere->init("models/mySphere.obj", blinnShaderBlue);
+    
+    std::shared_ptr<Mesh> table = std::make_shared<Mesh>();
+    table->init("models/table.obj", blinnShaderBlue);
     
     //----------------------------------------------------
     // Nodes
     std::shared_ptr<Node> scene = std::make_shared<Node>();
-    std::shared_ptr<Node> teapotNode = std::make_shared<Node>();
-    std::shared_ptr<Node> cubeNode = std::make_shared<Node>();
-    std::shared_ptr<Node> bunnyNode = std::make_shared<Node>();
-    //std::shared_ptr<Node> boxNode = std::make_shared<Node>();
-    
+    std::shared_ptr<Node> pinkOrb2Node = std::make_shared<Node>();
+    std::shared_ptr<Node> coneNode = std::make_shared<Node>();
+    //std::shared_ptr<Node> mysphereNode = std::make_shared<Node>();
+    std::shared_ptr<Node> tableNode = std::make_shared<Node>();
+
     //----------------------------------------------------
     // Build the tree
-    teapotNode->addMesh(teapot);
-    cubeNode->addMesh(cube, glm::mat4(1.0), glm::mat4(1.0), glm::scale(glm::vec3(2.0f, 0.25f, 1.5f)));
-    bunnyNode->addMesh(bunny, glm::mat4(1.0), glm::mat4(1.0), glm::scale(glm::vec3(0.005f, 0.005f, 0.005f)));
-    //boxNode->addMesh(box, glm::mat4(1.0), glm::rotate(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+    pinkOrb2Node->addMesh(pinkOrb2, glm::mat4(1.0), glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+    coneNode->addMesh(cone, glm::mat4(1.0), glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+    //mysphereNode->addMesh(mysphere, glm::mat4(1.0), glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+    tableNode->addMesh(table, glm::mat4(1.0), glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+    
 
-    cubeNode->addChild(teapotNode, glm::translate(glm::vec3(-1.2f, 0.5f, 0.0f)));
-    cubeNode->addChild(bunnyNode, glm::translate(glm::vec3(1.0f, 1.5f, 0.5f)));
     // cubeNode->addChild(teapotNode, glm::translate(glm::vec3(0.0f, 1.0f, 0.0f)), glm::rotate(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
     
     //----------------------------------------------------
     // Add the tree to the world space
-    scene->addChild(cubeNode);
+    
+    scene->addChild(pinkOrb2Node, glm::translate(glm::vec3(0.0f, 5.0f, 0.0f)));
+    scene->addChild(coneNode, glm::translate(glm::vec3(0.0f, 0.0f, -5.0f)));
+    scene->addChild(tableNode, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
+    //scene->addChild(mysphereNode, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
+    
     // scene->addChild(boxNode);
     // scene->addChild(cubeNode, glm::translate(glm::vec3(1.0f, 0.0f, 0.0f)), glm::rotate(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
@@ -396,7 +410,7 @@ int main()
         //glEnable(GL_POLYGON_OFFSET_FILL);
         //glPolygonOffset(0.5f,0.5f);
 
-        scene->setShaderId(depthShader);
+        // scene->setShaderId(blinnShader);
         scene->draw(matModelRoot, matLightView, matLightProj);
         
         glCullFace(GL_BACK);
@@ -410,7 +424,7 @@ int main()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, width, height);
 
-            scene->setShaderId(shadowShader);
+            // scene->setShaderId(blinnShader);
             scene->draw(matModelRoot, matView, matProj);
         }
 
